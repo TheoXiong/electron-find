@@ -1,0 +1,13 @@
+html,
+body{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow: auto;
+}
+section{
+  padding: 0px 20px;
+}
+h3{
+  margin-top: 30px;
+}
