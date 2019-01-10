@@ -1,5 +1,6 @@
 const Find = require('./find.js')
 const { print, on, off, move } = require('./utils.js')
+const { closeImg, leftImg, rightImg} = require('./image.js')
 
 const INPUT_INTERVAL_THRESHOLD = 360
 
@@ -151,8 +152,8 @@ function getUserConfig (options) {
 }
 function setBoxStyle () {
   this[findBox].style.cssText = `position:fixed; top:-110%; z-index: 3001; max-height:48px; min-height:30px; 
-    right:${this[config].offsetRight}; display:flex; align-items: stretch; font-family:serif !important;
-    padding:6px; visibility: hidden; background:${this[config].boxBgColor}; box-sizing:border-box !important;
+    right:${this[config].offsetRight}; display:flex; align-items: stretch; box-sizing:border-box !important;
+    padding:6px; visibility: hidden; background:${this[config].boxBgColor}; 
     box-shadow: 1px 1px 2px 0.5px ${this[config].boxShadowColor};`
 }
 function setInputStyle () {
@@ -170,19 +171,28 @@ function setCaseStyle () {
     padding:0px 2px; border-radius:2px; border:1px solid transparent; margin-right:4px; display:flex; align-items:center;`
 }
 function setBackStyle () {
-  this[findBack].innerHTML = '➔'
-  this[findBack].style.cssText = `font-size:14px; cursor:pointer; -webkit-user-select:none; color:${this[config].textColor}; padding:0px 2px 3px; 
-    border-radius:2px; border:1px solid transparent; display:flex; align-items:center; transform: rotate(180deg);`
+  this[findBack].style.cssText = `font-size:14px; cursor:pointer; -webkit-user-select:none; padding:2px; 
+    border-radius:2px; border:1px solid transparent; display:flex; align-items:center;`
+  let backImgEle = creatElement('find-back-img', 'img')
+  backImgEle.src = leftImg
+  backImgEle.style.cssText = `width: 16px; height: 16px;`
+  this[findBack].appendChild(backImgEle)
 }
 function setForwardStyle () {
-  this[findForward].innerHTML = '➔'
-  this[findForward].style.cssText = `font-size:14px; cursor:pointer; -webkit-user-select:none; color:${this[config].textColor};
-    padding:0px 2px; border-radius:2px; border:1px solid transparent; margin-right:2px; display:flex; align-items:center;`
+  this[findForward].style.cssText = `font-size:14px; cursor:pointer; -webkit-user-select:none; 
+    padding:2px; border-radius:2px; border:1px solid transparent; margin-right:2px; display:flex; align-items:center;`
+  let forwardImgEle = creatElement('find-forward-img', 'img')
+  forwardImgEle.src = rightImg
+  forwardImgEle.style.cssText = `width: 16px; height: 16px;`
+  this[findForward].appendChild(forwardImgEle)
 }
 function setCloseStyle () {
-  this[findClose].innerHTML = '✖'
-  this[findClose].style.cssText = `font-size:14px; cursor:pointer; -webkit-user-select:none; color:${this[config].textColor};
-    padding:2px 3.5px; border-radius:2px; border:1px solid transparent; margin-right:2px; display:flex; align-items:center;`
+  this[findClose].style.cssText = `font-size:14px; cursor:pointer; -webkit-user-select:none; 
+    padding:2px; border-radius:2px; border:1px solid transparent; margin-right:2px; display:flex; align-items:center;`
+  let closeImgEle = creatElement('find-close-img', 'img')
+  closeImgEle.src = closeImg
+  closeImgEle.style.cssText = `width: 16px; height: 16px;`
+  this[findClose].appendChild(closeImgEle)
 }
 function appendElement () {
   [this[findInput], this[findMatches], this[findCase], this[findBack], this[findForward], this[findClose]].forEach((item) => { 

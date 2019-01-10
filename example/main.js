@@ -22,7 +22,9 @@ function createWindow () {
 
   win.on('focus', () => {
     globalShortcut.register('CommandOrControl+F', function () {
-      win.webContents.send('on-find', '')
+      if (win && win.webContents) {
+        win.webContents.send('on-find', '')
+      }
     })
   })
   win.on('blur', () => {
@@ -34,9 +36,9 @@ function createWindow () {
 app.on('ready', createWindow)
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
-    globalShortcut.unregisterAll()
     app.quit()
   }
+  globalShortcut.unregister('CommandOrControl+F')
 })
 
 app.on('activate', () => {
