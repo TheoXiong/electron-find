@@ -1,6 +1,8 @@
 const Find = require('./find.js')
 const { print, on, off, move } = require('./utils.js')
 
+const INPUT_INTERVAL_THRESHOLD = 360
+
 const findBox = Symbol('findBox')
 const findInput = Symbol('findInput')
 const findMatches = Symbol('findMatches')
@@ -11,10 +13,10 @@ const findClose = Symbol('findClose')
 const hasOpened = Symbol('hasOpened')
 const matchCase = Symbol('matchCase')
 
+const documentKeydown = Symbol('documentKeydown')
 const inputFocus = Symbol('inputFocus')
 const inputBlur = Symbol('inputBlur')
 const inputEvent = Symbol('inputEvent')
-const inputKeydown = Symbol('inputKeydown')
 const compositionstart = Symbol('compositionstart')
 const compositionend = Symbol('compositionend')
 const caseMouseenter = Symbol('caseMouseenter')
@@ -34,6 +36,7 @@ const events = Symbol('events')
 const inComposition = Symbol('inComposition')
 const action = Symbol('action')
 const lastText = Symbol('lastText')
+const inputCnt = Symbol('inputCnt')
 const initialized = Symbol('initialized')
 const config = Symbol('config')
 
@@ -52,6 +55,7 @@ class FindInPage extends Find{
     this[inComposition] = false
     this[action] = ''
     this[lastText] = ''
+    this[inputCnt] = 0
     this[initialized] = false
     this[config] = {}
     this[events] = []
@@ -108,10 +112,23 @@ class FindInPage extends Find{
       .catch(err => { throw err })
     return this[hasOpened] = true
   }
+  closeFindWindow () {
+    if (!this[hasOpened]) return false
+    this[findInput].value = ''
+    this[action] = ''
+    this[lastText] = ''
+    this[findMatches].innerText = '0/0'
+    this[hasOpened] = false
+    lockNext.call(this)
+    move(this[findBox], (0 - this[findBox].offsetHeight - 10), this.duration)
+      .then(() => { this[findBox].style['visibility'] = 'hidden' })
+      .catch(err => { throw err })
+    return true
+  }
   destroy () {
     this.destroyFind()
     unbindEvents.call(this)
-    closeFindWindow.call(this)
+    this.closeFindWindow()
     removeElement.call(this)
   }
 }
@@ -133,13 +150,13 @@ function getUserConfig (options) {
   this[config].caseSelectedColor = typeof options.caseSelectedColor === 'string' ? options.caseSelectedColor : '#c5ade0'
 }
 function setBoxStyle () {
-  this[findBox].style.cssText = `position:fixed; top:-110%; 
-    right:${this[config].offsetRight}; display:flex; align-items: center; 
-    padding:6px; visibility: hidden; background:${this[config].boxBgColor}; 
+  this[findBox].style.cssText = `position:fixed; top:-110%; z-index: 3001; max-height:48px; min-height:30px; 
+    right:${this[config].offsetRight}; display:flex; align-items: stretch; font-family:serif !important;
+    padding:6px; visibility: hidden; background:${this[config].boxBgColor}; box-sizing:border-box !important;
     box-shadow: 1px 1px 2px 0.5px ${this[config].boxShadowColor};`
 }
 function setInputStyle () {
-  this[findInput].style.cssText = `width:168px; height: 20px; outline:0; border:1px solid ${this[config].inputBgColor}; 
+  this[findInput].style.cssText = `width:168px; outline:0; border:1px solid ${this[config].inputBgColor}; 
     background:${this[config].inputBgColor}; margin-right:6px; border-radius:2px;`
 }
 function setMatchesStyle () {
@@ -150,17 +167,17 @@ function setMatchesStyle () {
 function setCaseStyle () {
   this[findCase].innerText = 'Aa'
   this[findCase].style.cssText = `font-size:14px; font-weight:700; cursor:pointer; -webkit-user-select:none; color:${this[config].textColor}; 
-    padding:3.5px 1px; border-radius:2px; border:1px solid transparent; margin-right:4px;`
+    padding:0px 2px; border-radius:2px; border:1px solid transparent; margin-right:4px; display:flex; align-items:center;`
 }
 function setBackStyle () {
   this[findBack].innerHTML = '➔'
-  this[findBack].style.cssText = `font-size:14px; cursor:pointer; -webkit-user-select:none; color:${this[config].textColor}; padding:1px 2px 3px; 
+  this[findBack].style.cssText = `font-size:14px; cursor:pointer; -webkit-user-select:none; color:${this[config].textColor}; padding:0px 2px 3px; 
     border-radius:2px; border:1px solid transparent; display:flex; align-items:center; transform: rotate(180deg);`
 }
 function setForwardStyle () {
   this[findForward].innerHTML = '➔'
   this[findForward].style.cssText = `font-size:14px; cursor:pointer; -webkit-user-select:none; color:${this[config].textColor};
-    padding:2px; border-radius:2px; border:1px solid transparent; margin-right:2px; display:flex; align-items:center;`
+    padding:0px 2px; border-radius:2px; border:1px solid transparent; margin-right:2px; display:flex; align-items:center;`
 }
 function setCloseStyle () {
   this[findClose].innerHTML = '✖'
@@ -177,6 +194,12 @@ function removeElement () {
   this.parentElement.removeChild(this[findBox])
 }
 function creatEventHandler () {
+  this[documentKeydown] = (function (e) {
+    if (!this[hasOpened]) return
+    onKeydown.call(this, e)
+  }).bind(this)
+  this[events].push({ ele: document, name: 'keydown', fn: this[documentKeydown] })
+
   this[inputFocus] = (function () {
     this[findInput].style.border = `1px solid ${this[config].inputFocusColor}`
   }).bind(this)
@@ -188,14 +211,13 @@ function creatEventHandler () {
   this[events].push({ ele: this[findInput], name: 'blur', fn: this[inputBlur] })
 
   this[inputEvent] = (function () {
-    onInput.call(this)
+    updateCnt.call(this)
+    isInputing.call(this)
+      .then(res => {
+        res ? '' : onInput.call(this)
+      })
   }).bind(this)
   this[events].push({ ele: this[findInput], name: 'input', fn: this[inputEvent] })
-
-  this[inputKeydown] = (function (e) {
-    onKeydown.call(this, e)
-  }).bind(this)
-  this[events].push({ ele: this[findInput], name: 'keydown', fn: this[inputKeydown] })
 
   this[compositionstart] = (function () {
     print('compositionstart')
@@ -281,6 +303,22 @@ function unbindEvents () {
   })
 }
 
+function updateCnt () {
+  if (this[inputCnt] >= 0xFFFFFFFE) {
+    this[inputCnt] = 0
+  }
+  this[inputCnt]++
+}
+
+function isInputing () {
+  return new Promise((resolve, reject) => {
+    let currCnt = this[inputCnt]
+    setTimeout(() => {
+      currCnt !== this[inputCnt] ? resolve(true) : resolve(false)
+    }, INPUT_INTERVAL_THRESHOLD)
+  })
+}
+
 function focusInput (doBlur = false) {
   setTimeout(() => { 
     doBlur ? this[findInput].blur() : ''
@@ -326,7 +364,7 @@ function onKeydown (e) {
     case 'NumpadEnter':
       let text = this[findInput].value
       if (!text) return
-      e.shiftKey ? findKeep.call(this, text, false) : findKeep.call(this, text, true)
+      e.shiftKey ? findKeep.call(this, false) : findKeep.call(this, true)
       break
     case 'Escape':
       onCloseClick.call(this)
@@ -336,12 +374,9 @@ function onKeydown (e) {
   }
 }
 
-function findKeep (text, forward) {
-  this[action] = 'input'
-  this.stopFind('keepSelection')
-  this[lastText] = text
-  wrapInput(this[findInput], 100)
-  this.startFind(text, forward, this[matchCase])
+function findKeep (forward) {
+  if (!this.isFinding()) return
+  forward ? onForwardClick.call(this) : onBackClick.call(this)
 }
 
 function onCaseClick () {
@@ -371,7 +406,7 @@ function onForwardClick () {
 }
 
 function onCloseClick () {
-  closeFindWindow.call(this) ? this.stopFind() : ''
+  this.closeFindWindow() ? this.stopFind() : ''
 }
 
 function onResult () {
@@ -395,20 +430,6 @@ function unlockNext () {
   this[findBack].style['pointer-events'] = 'auto'
   this[findForward].style['opacity'] = 1
   this[findForward].style['pointer-events'] = 'auto'
-}
-
-function closeFindWindow () {
-  if (!this[hasOpened]) return false
-  this[findInput].value = ''
-  this[action] = ''
-  this[lastText] = ''
-  this[findMatches].innerText = '0/0'
-  this[hasOpened] = false
-  lockNext.call(this)
-  move(this[findBox], (0 - this[findBox].offsetHeight - 10), this.duration)
-    .then(() => { this[findBox].style['visibility'] = 'hidden' })
-    .catch(err => { throw err })
-  return true
 }
 
 module.exports = FindInPage
