@@ -1,6 +1,5 @@
 const Find = require('./find.js')
 const { print, on, off, move } = require('./utils.js')
-const { closeImg, leftImg, rightImg} = require('./image.js')
 
 const INPUT_INTERVAL_THRESHOLD = 360
 
@@ -140,10 +139,11 @@ function creatElement (className = '', tag = 'div') {
   return ele
 }
 function getUserConfig (options) {
-  this[config].offsetTop = typeof options.offsetTop === 'number' ? `${options.offsetTop}px` : '0px'
-  this[config].offsetRight = typeof options.offsetRight === 'number' ? `${options.offsetRight}px` : '0px'
+  this[config].offsetTop = typeof options.offsetTop === 'number' ? `${options.offsetTop}px` : '5px'
+  this[config].offsetRight = typeof options.offsetRight === 'number' ? `${options.offsetRight}px` : '5px'
   this[config].boxBgColor = typeof options.boxBgColor === 'string' ? options.boxBgColor : '#fff'
   this[config].boxShadowColor = typeof options.boxShadowColor === 'string' ? options.boxShadowColor : '#909399'
+  this[config].inputColor = typeof options.inputColor === 'string' ? options.inputColor : '#606266'
   this[config].inputBgColor = typeof options.inputBgColor === 'string' ? options.inputBgColor : '#f0f0f0'
   this[config].inputFocusColor = typeof options.inputFocusColor === 'string' ? options.inputFocusColor : '#c5ade0'
   this[config].textColor = typeof options.textColor === 'string' ? options.textColor : '#606266'
@@ -152,13 +152,13 @@ function getUserConfig (options) {
 }
 function setBoxStyle () {
   this[findBox].style.cssText = `position:fixed; top:-110%; z-index: 3001; max-height:48px; min-height:30px; 
-    right:${this[config].offsetRight}; display:flex; align-items: stretch; box-sizing:border-box !important;
+    right:${this[config].offsetRight}; display:flex; align-items:center; box-sizing:border-box !important;
     padding:6px; visibility: hidden; background:${this[config].boxBgColor}; 
     box-shadow: 1px 1px 2px 0.5px ${this[config].boxShadowColor};`
 }
 function setInputStyle () {
   this[findInput].style.cssText = `width:168px; outline:0; border:1px solid ${this[config].inputBgColor}; 
-    background:${this[config].inputBgColor}; margin-right:6px; border-radius:2px;`
+    background:${this[config].inputBgColor}; margin-right:6px; border-radius:2px; color:${this[config].inputColor}`
 }
 function setMatchesStyle () {
   this[findMatches].innerText = '0/0'
@@ -171,28 +171,46 @@ function setCaseStyle () {
     padding:0px 2px; border-radius:2px; border:1px solid transparent; margin-right:4px; display:flex; align-items:center;`
 }
 function setBackStyle () {
-  this[findBack].style.cssText = `font-size:14px; cursor:pointer; -webkit-user-select:none; padding:2px; 
-    border-radius:2px; border:1px solid transparent; display:flex; align-items:center;`
-  let backImgEle = creatElement('find-back-img', 'img')
-  backImgEle.src = leftImg
-  backImgEle.style.cssText = `width: 16px; height: 16px;`
-  this[findBack].appendChild(backImgEle)
+  this[findBack].style.cssText = `cursor:pointer; -webkit-user-select:none; position: relative; height: 20px; width: 20px; border-radius:2px;
+    overflow: hidden; display: inline-block; background:${this[config].boxBgColor}; border:0px solid ${this[config].boxBgColor};`
+
+  let backLine = creatElement('find-back-line')
+  backLine.style.cssText = `width:0; height:0; border:7px solid transparent; border-right-color:${this[config].textColor};
+    position: absolute; top:3px; left:-1px;`
+  this[findBack].appendChild(backLine)
+
+  let backCover = creatElement('find-back-cover')
+  backCover.style.cssText = `width:0; height:0; border:7px solid transparent; border-right-color:inherit;
+    position: absolute; top:3px; left:2px; z-index:1001;`
+  this[findBack].appendChild(backCover)
 }
 function setForwardStyle () {
-  this[findForward].style.cssText = `font-size:14px; cursor:pointer; -webkit-user-select:none; 
-    padding:2px; border-radius:2px; border:1px solid transparent; margin-right:2px; display:flex; align-items:center;`
-  let forwardImgEle = creatElement('find-forward-img', 'img')
-  forwardImgEle.src = rightImg
-  forwardImgEle.style.cssText = `width: 16px; height: 16px;`
-  this[findForward].appendChild(forwardImgEle)
+  this[findForward].style.cssText = `cursor:pointer; -webkit-user-select:none; position: relative; height: 20px; width: 20px; border-radius:2px;
+    overflow: hidden; display: inline-block; background:${this[config].boxBgColor}; border:0px solid ${this[config].boxBgColor};`
+
+  let forwardLine = creatElement('find-forward-line')
+  forwardLine.style.cssText = `width:0; height:0; border:7px solid transparent; border-left-color:${this[config].textColor};
+    position: absolute; top:3px; left:6px;`
+  this[findForward].appendChild(forwardLine)
+
+  let forwardCover = creatElement('find-forward-cover')
+  forwardCover.style.cssText = `width:0; height:0; border:7px solid transparent; border-left-color:inherit;
+    position: absolute; top:3px; left:3px; z-index:1001;`
+  this[findForward].appendChild(forwardCover)
 }
 function setCloseStyle () {
-  this[findClose].style.cssText = `font-size:14px; cursor:pointer; -webkit-user-select:none; 
-    padding:2px; border-radius:2px; border:1px solid transparent; margin-right:2px; display:flex; align-items:center;`
-  let closeImgEle = creatElement('find-close-img', 'img')
-  closeImgEle.src = closeImg
-  closeImgEle.style.cssText = `width: 16px; height: 16px;`
-  this[findClose].appendChild(closeImgEle)
+  this[findClose].style.cssText = `cursor:pointer; -webkit-user-select:none; position: relative; height: 20px; width: 20px;
+    overflow: hidden; display: inline-block; background:${this[config].boxBgColor}; border-radius:2px;`
+
+  let closeInner1 = creatElement('find-close-inner1')
+  closeInner1.style.cssText = `width:14px; height:2px; background:${this[config].textColor}; transform:rotate(45deg);
+    position: absolute; top:9px; left:3px;`
+  this[findClose].appendChild(closeInner1)
+
+  let closeInner2 = creatElement('find-close-inner2')
+  closeInner2.style.cssText = `width:14px; height:2px; background:${this[config].textColor}; transform:rotate(-45deg);
+  position: absolute; top:9px; left:3px;`
+  this[findClose].appendChild(closeInner2)
 }
 function appendElement () {
   [this[findInput], this[findMatches], this[findCase], this[findBack], this[findForward], this[findClose]].forEach((item) => { 
@@ -258,11 +276,13 @@ function creatEventHandler () {
 
   this[backMouseenter] = (function () {
     this[findBack].style['background'] = this[config].textHoverBgColor
+    this[findBack].style['border'] = `0px solid ${this[config].textHoverBgColor}`
   }).bind(this)
   this[events].push({ ele: this[findBack], name: 'mouseenter', fn: this[backMouseenter] })
 
   this[backMouseleave] = (function () {
     this[findBack].style['background'] = this[config].boxBgColor
+    this[findBack].style['border'] = `0px solid ${this[config].boxBgColor}`
   }).bind(this)
   this[events].push({ ele: this[findBack], name: 'mouseleave', fn: this[backMouseleave] })
 
@@ -273,11 +293,13 @@ function creatEventHandler () {
 
   this[forwardMouseenter] = (function () {
     this[findForward].style['background'] = this[config].textHoverBgColor
+    this[findForward].style['border'] = `0px solid ${this[config].textHoverBgColor}`
   }).bind(this)
   this[events].push({ ele: this[findForward], name: 'mouseenter', fn: this[forwardMouseenter] })
 
   this[forwardMouseleave] = (function () {
     this[findForward].style['background'] = this[config].boxBgColor
+    this[findForward].style['border'] = `0px solid ${this[config].boxBgColor}`
   }).bind(this)
   this[events].push({ ele: this[findForward], name: 'mouseleave', fn: this[forwardMouseleave] })
 
