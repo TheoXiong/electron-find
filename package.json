@@ -1,6 +1,6 @@
 {
   "name": "electron-find",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Find all matches for the text in electron app",
   "main": "src/index.js",
   "scripts": {
