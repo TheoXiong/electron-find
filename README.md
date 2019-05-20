@@ -37,7 +37,7 @@ import { FindInPage } from 'electron-find'
 let findInPage = new FindInPage(remote.getCurrentWebContents())
 findInPage.openFindWindow()
 
-# use preload option, the find interface will be loaded when creat instance
+# use preload option, the find interface will be loaded when create instance
 let findInPage = new FindInPage(remote.getCurrentWebContents(), {
   preload: true
 })
@@ -93,7 +93,7 @@ npm run e
  ` new FindInPage(webContents, [options]) `
 - ` webContents ` Object(required) - The webContents of renderer process
 - ` options ` Object(optional)
-   - ` preload ` Boolean - Whether load the find interface when creat instance. Default is `false`.
+   - ` preload ` Boolean - Whether load the find interface when create instance. Default is `false`.
    - ` parentElement ` Object - Specify parent dom of the find interface. Default is `document.body`.
    - ` duration ` Number - Specify moving time when the find window open or close. Default is `300` (ms).
    - ` offsetTop ` Number - Specify offset relative to the top of parentElement. Default is `5`.
@@ -117,7 +117,7 @@ npm run e
  Close the find window when it has opened.  
  &nbsp;   
   ` findInPage.destroy() `  
- Close the find window, and release memery.
+ Close the find window, and release memory.
 
 
 
