@@ -33,11 +33,11 @@ $   npm install electron-find --save
 import { remote, ipcRenderer } from 'electron'
 import { FindInPage } from 'electron-find'
 
-# creat instance of FindInPage with default config
+# create instance of FindInPage with default config
 let findInPage = new FindInPage(remote.getCurrentWebContents())
 findInPage.openFindWindow()
 
-# use preload option, the find interface will be loaded when creat instance
+# use preload option, the find interface will be loaded when create instance
 let findInPage = new FindInPage(remote.getCurrentWebContents(), {
   preload: true
 })
@@ -78,6 +78,10 @@ findInPage.openFindWindow()
 # there is a simply demo for reference
 npm install
 npm run e
+
+# there is another example with webview
+npm install
+npm run e2
 ```
 ## Shortcut
 | keys   |   function  |
@@ -93,7 +97,7 @@ npm run e
  ` new FindInPage(webContents, [options]) `
 - ` webContents ` Object(required) - The webContents of renderer process
 - ` options ` Object(optional)
-   - ` preload ` Boolean - Whether load the find interface when creat instance. Default is `false`.
+   - ` preload ` Boolean - Whether load the find interface when create instance. Default is `false`.
    - ` parentElement ` Object - Specify parent dom of the find interface. Default is `document.body`.
    - ` duration ` Number - Specify moving time when the find window open or close. Default is `300` (ms).
    - ` offsetTop ` Number - Specify offset relative to the top of parentElement. Default is `5`.
