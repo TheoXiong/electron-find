@@ -1,10 +1,11 @@
 {
   "name": "electron-find",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Find all matches for the text in electron app",
   "main": "src/index.js",
   "scripts": {
-    "e": "node_modules/.bin/electron example/main.js"
+    "e": "node_modules/.bin/electron example/main.js",
+    "e2": "node_modules/.bin/electron example2/main.js"
   },
   "repository": {
     "type": "git",

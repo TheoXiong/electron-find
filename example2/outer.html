@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Outer</title>
+    <style>
+      .app{
+        height: 100%;
+      }
+      .outer{
+        padding: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <div class="outer">
+        <h3>Is in app</h3> 
+        <div>Main content</div>
+      </div>
+      <hr>
+      <webview id="webview1" src="./inner1.html"></webview>
+      <webview id="webview2" src="./inner2.html"></webview>
+    </div>
+    <script src="outer.js"></script>
+  </body>
+</html>
