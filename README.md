@@ -121,7 +121,7 @@ npm run e2
  Close the find window when it has opened.  
  &nbsp;   
   ` findInPage.destroy() `  
- Close the find window, and release memery.
+ Close the find window, and release memory.
 
 
 
