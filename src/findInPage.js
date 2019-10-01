@@ -345,7 +345,7 @@ function updateCnt () {
 function isInputing () {
   return new Promise((resolve, reject) => {
     let currCnt = this[inputCnt]
-	let timeout = this[inputCnt].length > 3 ? INPUT_INTERVAL_THRESHOLD : 2500;
+	let timeout = currCnt > 3 ? INPUT_INTERVAL_THRESHOLD : 2500;
     setTimeout(() => {
       currCnt !== this[inputCnt] ? resolve(true) : resolve(false)
     }, timeout)
