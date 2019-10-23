@@ -5,7 +5,11 @@ const { FindInPage } = require('../src/index.js')
 let findInPage = new FindInPage(remote.getCurrentWebContents(), {
   preload: true,
   offsetTop: 6,
-  offsetRight: 10
+  offsetRight: 10,
+  forwardBackwardBorderRadius: 10,
+  forwardBackwardRotate: 90,
+  caseFont: "Arial",
+  closeBorderRadius: 10
 })
 
 // let findInPage = new FindInPage(remote.getCurrentWebContents(), {

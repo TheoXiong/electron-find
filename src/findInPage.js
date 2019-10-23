@@ -149,6 +149,10 @@ function getUserConfig (options) {
   this[config].textColor = typeof options.textColor === 'string' ? options.textColor : '#606266'
   this[config].textHoverBgColor = typeof options.textHoverBgColor === 'string' ? options.textHoverBgColor : '#eaeaea'
   this[config].caseSelectedColor = typeof options.caseSelectedColor === 'string' ? options.caseSelectedColor : '#c5ade0'
+  this[config].forwardBackwardBorderRadius = typeof options.forwardBackwardBorderRadius === 'number' ? `${options.forwardBackwardBorderRadius}px` : '0px'
+  this[config].forwardBackwardRotate = typeof options.forwardBackwardRotate === 'number' ? `${options.forwardBackwardRotate}deg`: '0deg'
+  this[config].caseFont = typeof options.caseFont === 'string' ? options.caseFont : "Times New Roman"
+  this[config].closeBorderRadius = typeof options.closeBorderRadius === 'number' ? `${options.closeBorderRadius}px` : '0px'
 }
 function setBoxStyle () {
   this[findBox].style.cssText = `position:fixed; top:-110%; z-index: 3001; max-height:48px; min-height:30px; 
@@ -167,16 +171,16 @@ function setMatchesStyle () {
 }
 function setCaseStyle () {
   this[findCase].innerText = 'Aa'
-  this[findCase].style.cssText = `font-size:14px; font-weight:700; cursor:pointer; -webkit-user-select:none; color:${this[config].textColor}; 
+  this[findCase].style.cssText = `font-family: ${this[config].caseFont}, Times, serif; font-size:14px; font-weight:700; cursor:pointer; -webkit-user-select:none; color:${this[config].textColor}; 
     padding:0px 2px; border-radius:2px; border:1px solid transparent; margin-right:4px; display:flex; align-items:center;`
 }
 function setBackStyle () {
   this[findBack].style.cssText = `cursor:pointer; -webkit-user-select:none; position: relative; height: 20px; width: 20px; border-radius:2px;
-    overflow: hidden; display: inline-block; background:${this[config].boxBgColor}; border:0px solid ${this[config].boxBgColor};`
+    overflow: hidden; display: inline-block; background:${this[config].boxBgColor}; border:0px solid ${this[config].boxBgColor}; transform:rotate(${this[config].forwardBackwardRotate});`
 
   let backLine = creatElement('find-back-line')
   backLine.style.cssText = `width:0; height:0; border:7px solid transparent; border-right-color:${this[config].textColor};
-    position: absolute; top:3px; left:-1px;`
+    position: absolute; top:3px; left:-1px; border-radius:${this[config].forwardBackwardBorderRadius};`
   this[findBack].appendChild(backLine)
 
   let backCover = creatElement('find-back-cover')
@@ -186,11 +190,11 @@ function setBackStyle () {
 }
 function setForwardStyle () {
   this[findForward].style.cssText = `cursor:pointer; -webkit-user-select:none; position: relative; height: 20px; width: 20px; border-radius:2px;
-    overflow: hidden; display: inline-block; background:${this[config].boxBgColor}; border:0px solid ${this[config].boxBgColor};`
+    overflow: hidden; display: inline-block; background:${this[config].boxBgColor}; border:0px solid ${this[config].boxBgColor}; transform:rotate(${this[config].forwardBackwardRotate});`
 
   let forwardLine = creatElement('find-forward-line')
   forwardLine.style.cssText = `width:0; height:0; border:7px solid transparent; border-left-color:${this[config].textColor};
-    position: absolute; top:3px; left:6px;`
+    position: absolute; top:3px; left:6px; border-radius:${this[config].forwardBackwardBorderRadius};`
   this[findForward].appendChild(forwardLine)
 
   let forwardCover = creatElement('find-forward-cover')
@@ -204,12 +208,12 @@ function setCloseStyle () {
 
   let closeInner1 = creatElement('find-close-inner1')
   closeInner1.style.cssText = `width:14px; height:2px; background:${this[config].textColor}; transform:rotate(45deg);
-    position: absolute; top:9px; left:3px;`
+    position: absolute; top:9px; left:3px; border-radius:${this[config].closeBorderRadius};`
   this[findClose].appendChild(closeInner1)
 
   let closeInner2 = creatElement('find-close-inner2')
   closeInner2.style.cssText = `width:14px; height:2px; background:${this[config].textColor}; transform:rotate(-45deg);
-  position: absolute; top:9px; left:3px;`
+  position: absolute; top:9px; left:3px; border-radius:${this[config].closeBorderRadius};`
   this[findClose].appendChild(closeInner2)
 }
 function appendElement () {
