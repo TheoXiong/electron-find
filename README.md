@@ -104,7 +104,7 @@ npm run e2
    - ` offsetRight ` Number - Specify offset relative to the right of parentElement. Default is `5`.
    - ` boxBgColor ` String - Specify background color of the find interface. Default is `"#ffffff"`.
    - ` boxShadowColor ` String - Specify shadow color of the find interface. Default is `"#909399"`.
-   - ` inputColor ` String - Specify text color of the input form. Default is "#606266".
+   - ` inputColor ` String - Specify text color of the input form. Default is `"#606266"`.
    - ` inputBgColor ` String - Specify background color of the input form. Default is `"#f0f0f0"`.
    - ` inputFocusColor ` String - Specify border color of the input form when focusing. Default is `"#c5ade0"`.
    - ` textColor ` String - Specify color of the text in find interface. Default is `"#606266"`.
@@ -112,7 +112,7 @@ npm run e2
    - ` caseSelectedColor ` String - Specify border color of the matchCase button when selected. Default is `"#c5ade0"`.
 
  ### Instance Methods
- Objects created with new FindInPage have the following instance methods:      
+ Objects created with new `FindInPage` have the following instance methods:      
  &nbsp;  
   ` findInPage.openFindWindow() `  
  Open the find window when it is closed. Focus input form when the find window has opened.  
