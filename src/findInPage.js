@@ -108,9 +108,11 @@ class FindInPage extends Find{
       focusInput.call(this)
     }, 10)
     move(this[findBox], parseInt(this[config].offsetTop), this.duration)
-      .then(() => {})
-      .catch(err => { throw err })
-    return this[hasOpened] = true
+        .then(() => {
+          this[hasOpened] = true
+        })
+        .catch(err => { throw err })
+    return true
   }
   closeFindWindow () {
     if (!this[hasOpened]) return false
@@ -118,11 +120,13 @@ class FindInPage extends Find{
     this[action] = ''
     this[lastText] = ''
     this[findMatches].innerText = '0/0'
-    this[hasOpened] = false
     lockNext.call(this)
     move(this[findBox], (0 - this[findBox].offsetHeight - 10), this.duration)
-      .then(() => { this[findBox].style['visibility'] = 'hidden' })
-      .catch(err => { throw err })
+        .then(() => {
+          this[findBox].style['visibility'] = 'hidden'
+          this[hasOpened] = false
+        })
+        .catch(err => { throw err })
     return true
   }
   destroy () {
