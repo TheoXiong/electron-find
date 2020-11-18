@@ -224,6 +224,10 @@ function removeElement () {
 function creatEventHandler () {
   this[documentKeydown] = (function (e) {
     if (!this[hasOpened]) return
+
+    var selection = window.getSelection()
+    if(selection.focusNode && selection.focusNode !== this[findBox]) return
+
     onKeydown.call(this, e)
   }).bind(this)
   this[events].push({ ele: document, name: 'keydown', fn: this[documentKeydown] })
