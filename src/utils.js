@@ -1,5 +1,4 @@
 const debug = false
-const print = debug ? console.log.bind(console) : () => {}
 
 const on = (() => {
   if (document && document.addEventListener) {
@@ -99,7 +98,7 @@ const move = (element, end, duration = 300) => {
 }
 
 module.exports = {
-  print,
+  debug,
   on,
   off,
   once,

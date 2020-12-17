@@ -1,5 +1,5 @@
-const Find = require('./find.js')
-const { print, on, off, move } = require('./utils.js')
+const { Find, print } = require('./find.js')
+const { on, off, move } = require('./utils.js')
 
 const INPUT_INTERVAL_THRESHOLD = 360
 
@@ -41,8 +41,10 @@ const initialized = Symbol('initialized')
 const config = Symbol('config')
 
 class FindInPage extends Find{
-  constructor (webContents, options = {}) {
-    super(webContents)
+  constructor (ipcRenderer, options = {
+
+  }) {
+    super(ipcRenderer, options)
     this[findBox] = null
     this[findInput] = null
     this[findMatches] = null
@@ -63,16 +65,23 @@ class FindInPage extends Find{
     this.duration = (typeof options.duration === 'number' && options.duration > 0) ? options.duration : 300
     this.options = options
     this.options.preload ? this.initialize() : ''
+
+    // Subscribe on 'on-find' once for component
+    ipcRenderer.on('on-find', event => {
+      this.print('-> on-find')
+      this.openFindWindow()
+    });
   }
   initialize () {
     if (this[initialized]) {
-      print('[FindInPage] Has initialize.')
+      this.print(this, '[FindInPage] has initialized.')
       return true
     }
-    if (!this.initFind()) {
-      print('[FindInPage] Failed to initialize.')
+    if (!this.initFind(onResult)) {
+      this.print('[Find] Failed to initialize.')
       return false
     }
+    this.print('[FindInPage] Initializing...')
     this[findBox] = creatElement('find-box')
     this[findInput] = creatElement('find-input', 'input')
     this[findMatches] = creatElement('find-matches')
@@ -92,26 +101,32 @@ class FindInPage extends Find{
     creatEventHandler.call(this)
     bindEvents.call(this)
     appendElement.call(this)
-    onResult.call(this)
+    // onResult.call(this)
     move(this[findBox], (0 - this[findBox].offsetHeight - 10), this.duration)
     return this[initialized] = true
   }
   openFindWindow () {
     if (this[hasOpened]) {
+      this.print(this, '[FindInPage.openFindWindow] hasOpened = true')
       focusInput.call(this)
       return false
     }
-    if (!this.initialize()) return false
-    setTimeout(() => {  
+    if (!this.initialize()) {
+      this.print('[FindInPage] Failed to initialize.')
+      return false
+    }
+    setTimeout(() => {
       this[findBox].style['visibility'] = 'visible'
       lockNext.call(this)
-      focusInput.call(this)
+      focusInput.call(this,true)
     }, 10)
     move(this[findBox], parseInt(this[config].offsetTop), this.duration)
-        .then(() => {
-          this[hasOpened] = true
-        })
-        .catch(err => { throw err })
+      .then(() => {
+        this[hasOpened] = true
+        focusInput.call(this, true)
+      })
+      .catch(err => { throw err })
+
     return true
   }
   closeFindWindow () {
@@ -122,11 +137,12 @@ class FindInPage extends Find{
     this[findMatches].innerText = '0/0'
     lockNext.call(this)
     move(this[findBox], (0 - this[findBox].offsetHeight - 10), this.duration)
-        .then(() => {
-          this[findBox].style['visibility'] = 'hidden'
-          this[hasOpened] = false
-        })
-        .catch(err => { throw err })
+      .then(() => {
+        this[findBox].style['visibility'] = 'hidden'
+        this[hasOpened] = false
+        this.stopFind('close')
+      })
+      .catch(err => { throw err })
     return true
   }
   destroy () {
@@ -252,13 +268,13 @@ function creatEventHandler () {
   this[events].push({ ele: this[findInput], name: 'input', fn: this[inputEvent] })
 
   this[compositionstart] = (function () {
-    print('compositionstart')
+    print.call(this, '[FindInPage] compositionstart')
     this[inComposition] = true
   }).bind(this)
   this[events].push({ ele: this[findInput], name: 'compositionstart', fn: this[compositionstart] })
 
   this[compositionend] = (function () {
-    print('compositionend')
+    print.call(this, '[FindInPage] compositionend')
     this[inComposition] = false
   }).bind(this)
   this[events].push({ ele: this[findInput], name: 'compositionend', fn: this[compositionend] })
@@ -362,22 +378,6 @@ function focusInput (doBlur = false) {
   }, 50)
 }
 
-function wrapInput (inputEle, caseEle, timeout = 50) {
-  inputEle.type = 'password'
-  caseEle.style['visibility'] = 'hidden'
-
-  setTimeout(() => {
-    if (inputEle.type !== 'text') {
-      print('[FindInPage] wrapInput timeout..')
-      unwrapInput(inputEle, caseEle)
-    }
-  }, timeout)
-}
-function unwrapInput (inputEle, caseEle) {
-  inputEle.type = 'text'
-  caseEle.style['visibility'] = 'visible'
-}
-
 function onInput () {
   setTimeout(() => {
     if (this[inComposition]) return
@@ -385,7 +385,6 @@ function onInput () {
     let text = this[findInput].value
     if (text && text !== this[lastText]) {
       this[lastText] = text
-      wrapInput(this[findInput], this[findCase], 100)
       this.startFind(text, true, this[matchCase])
     } else if (this[lastText] && text === '') {
       this.stopFind()
@@ -422,39 +421,33 @@ function onCaseClick () {
   if (!this[matchCase]) {
     this[matchCase] = true
     this[findCase].style['border-color'] = this[config].caseSelectedColor
-    wrapInput(this[findInput], this[findCase], 100)
     this.startFind(this[findInput].value, true, this[matchCase])
   } else {
     this[matchCase] = false
     this[findCase].style['border-color'] = 'transparent'
-    wrapInput(this[findInput], this[findCase], 100)
     this.startFind(this[findInput].value, true, this[matchCase])
   }
 }
 
 function onBackClick () {
   this[action] = 'back'
-  wrapInput(this[findInput], this[findCase], 100)
   this.findNext(false, this[matchCase])
 }
 
 function onForwardClick () {
   this[action] = 'forward'
-  wrapInput(this[findInput], this[findCase], 100)
   this.findNext(true, this[matchCase])
 }
 
 function onCloseClick () {
-  this.closeFindWindow() ? this.stopFind() : ''
+  this.closeFindWindow()
 }
 
-function onResult () {
-  this.on('result', (activeMatch, matches) => {
-    unwrapInput(this[findInput], this[findCase])
-    this[findMatches].innerText = `${activeMatch}/${matches}`
-    matches > 0 ? unlockNext.call(this) : lockNext.call(this)
-    this[action] === 'input' ? focusInput.call(this) : ''
-  })
+function onResult(activeMatch, matches) {
+  this[findMatches].innerText = `${activeMatch}/${matches}`
+
+  matches > 0 ? unlockNext.call(this) : lockNext.call(this)
+  this.stopFind('keepSelection')
 }
 
 function lockNext () {

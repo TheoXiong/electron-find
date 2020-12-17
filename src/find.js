@@ -1,19 +1,18 @@
-const EventEmitter = require('events')
-const { print } = require('./utils.js')
+const { debug } = require('./utils.js')
 
-const stopActions = ['clearSelection', 'keepSelection', 'activateSelection']
-const wcs = Symbol('webContents')
+const stopActions = ['clearSelection', 'keepSelection', 'activateSelection', 'close']
+const ipcR = Symbol('ipcRenderer')
 const opts = Symbol('options')
 const requestId = Symbol('requestId')
 const activeMatch = Symbol('activeMatch')
 const matches = Symbol('matches')
 const initd = Symbol('initd')
 const preText = Symbol('preText')
+const onResult = Symbol('onResult')
 
-class Find extends EventEmitter {
-  constructor (webContents, options = {}) {
-    super()
-    this[wcs] = webContents
+class Find {
+  constructor (ipcRenderer, options = {}) {
+    this[ipcR] = ipcRenderer
     this[opts] = options
     this[requestId] = null
     this[activeMatch] = 0
@@ -21,23 +20,21 @@ class Find extends EventEmitter {
     this[initd] = false
     this[preText] = ''
   }
-  initFind () {
+  initFind (onResultFun) {
     if (this[initd]) return false
-    if (isWebContents.call(this)) {
-      bindFound.call(this)
-      return this[initd] = true
-    } else {
-      throw new Error('[Find] In need of a valid webContents !')
-    }
+    this[onResult] = onResultFun
+    bindFound.call(this)
+    return this[initd] = true
   }
   destroyFind () {
-    this[wcs] = null
+    this[ipcR]  = null
     this[opts]  = null
     this[requestId] = null
     this[activeMatch] = 0
     this[matches] = 0
     this[initd] = false
     this[preText] = ''
+    this[onResult] = null
   }
   isFinding () {
     return !!this[requestId]
@@ -47,47 +44,84 @@ class Find extends EventEmitter {
     this[activeMatch] = 0
     this[matches] = 0
     this[preText] = text
-    this[requestId] = this[wcs].findInPage(this[preText], {
-      forward,
-      matchCase 
+
+    this.findInPage(this[preText], {
+      forward: forward,
+      matchCase: matchCase
+    }).then(res => {
+      this.print(`this[requestId] = ${res}`)
+      this[requestId] = res
     })
-    print(`[Find] startFind text=${text} forward=${forward} matchCase=${matchCase}`)
   }
   findNext (forward, matchCase = false) {
     if (!this.isFinding()) throw new Error('Finding did not start yet !')
-    this[requestId] = this[wcs].findInPage(this[preText], {
-      forward,
-      matchCase,
+    this.findInPage(this[preText], {
+      forward: forward,
+      matchCase: matchCase,
       findNext: true
+    }).then(res => {
+      this[requestId] = res
     })
-    print(`[Find] findNext text=${this[preText]} forward=${forward} matchCase=${matchCase}`)
   }
   stopFind (action) {
     stopActions.includes(action) ? '' : action = 'clearSelection'
-    this[wcs].stopFindInPage(action)
-    print(`[Find] stopFind action=${action}`)
+
+    this.print(`<- stopFindInPage { action: ${action}, windowKey: ${this[opts].windowKey} }))`)
+
+    this[ipcR].send('stopFindInPage', {
+      action: action,
+      windowKey: this[opts].windowKey
+    })
+  }
+
+  print(any) {
+    print.call(this, any)
+  }
+
+  findInPage(text, options) {
+    this.print(`<- findInPage (text: ${text}, windowKey: ${this[opts].windowKey}, forward: ${options.forward}, matchCase: ${options.matchCase}, findNext: ${options.findNext})`)
+
+    return this[ipcR].invoke('findInPage', {
+      text: text,
+      windowKey: this[opts].windowKey,
+      options: options
+    })
   }
 }
-function isWebContents () {
-  return (this[wcs] && 
-    typeof this[wcs].findInPage === 'function' &&
-    typeof this[wcs].stopFindInPage === 'function')
+
+function print(any) {
+  if (debug) {
+    console.log(any)
+    try {
+      (this[ipcR] && this[opts] && this[opts].debugIpcChannel) ? this[ipcR].send(this[opts].debugIpcChannel, any) : console.log('Option debugIpcChannel is not defined')
+    } catch (e) {
+      console.log('Failed to send to debugIpcChannel')
+    }
+  }
 }
+
 function bindFound () {
-  this[wcs].on('found-in-page', (e, r) => {
+  this[ipcR].on('found-in-page', (e, r) => {
+    print.call(this, '-> found-in-page')
     onFoundInPage.call(this, r)
   })
 }
+
 function onFoundInPage (result) {
-  print('[Find] onFoundInPage, ', result)
   if (this[requestId] !== result.requestId) return
-  typeof result.activeMatchOrdinal === 'number' ? this[activeMatch] = result.activeMatchOrdinal : ''
-  typeof result.matches === 'number' ? this[matches] = result.matches : ''
-  result.finalUpdate ? reportResult.call(this) : ''
-}
-function reportResult () {
-  this.emit('result', this[activeMatch], this[matches])
-  typeof this[opts].onResult === 'function' ? this[opts].onResult(this[activeMatch], this[matches]) : ''
+
+  if (result.finalUpdate ) {
+    typeof result.activeMatchOrdinal === 'number' ? this[activeMatch] = result.activeMatchOrdinal : ''
+    typeof result.matches === 'number' ? this[matches] = result.matches : ''
+    reportResult.call(this)
+  }
 }
 
-module.exports = Find
+function reportResult () {
+  typeof this[onResult] === 'function' ? this[onResult].call(this, this[activeMatch], this[matches]) : ''
+}
+
+module.exports = {
+  Find,
+  print
+}
