@@ -398,10 +398,15 @@ function onInput () {
 
 function onKeydown (e) {
   if (this[inComposition] || !e) return
+  let text;
   switch (e.code) {
     case 'Enter':
+      text = this[findInput].value
+      if (!text) return
+      e.shiftKey ? findKeep.call(this, false) : findKeep.call(this, true)
+      break
     case 'NumpadEnter':
-      let text = this[findInput].value
+      text = this[findInput].value
       if (!text) return
       e.shiftKey ? findKeep.call(this, false) : findKeep.call(this, true)
       break
