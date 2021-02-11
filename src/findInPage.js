@@ -364,18 +364,20 @@ function focusInput (doBlur = false) {
 
 function wrapInput (inputEle, caseEle, timeout = 50) {
   // inputEle.type = 'password'
-  // caseEle.style['visibility'] = 'hidden'
+  inputEle.style['visibility'] = 'hidden'
+  caseEle.style['visibility'] = 'hidden'
 
-  // setTimeout(() => {
-  //   if (inputEle.type !== 'text') {
-  //     print('[FindInPage] wrapInput timeout..')
-  //     unwrapInput(inputEle, caseEle)
-  //   }
-  // }, timeout)
+  setTimeout(() => {
+    if (inputEle.type !== 'text') {
+      print('[FindInPage] wrapInput timeout..')
+      unwrapInput(inputEle, caseEle)
+    }
+  }, timeout)
 }
 function unwrapInput (inputEle, caseEle) {
   // inputEle.type = 'text'
-  // caseEle.style['visibility'] = 'visible'
+  inputEle.style['visibility'] = 'visible'
+  caseEle.style['visibility'] = 'visible'
 }
 
 function onInput () {
