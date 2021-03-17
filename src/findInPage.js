@@ -381,8 +381,14 @@ function unwrapInput (inputEle, caseEle) {
 }
 
 function onInput () {
-  setTimeout(() => {
+  this.previousInputTimeouts = this.previousInputTimeouts || []
+  this.previousInputTimeouts.push(setTimeout(() => {
     if (this[inComposition]) return
+
+    while(this.previousInputTimeouts.length) {
+      clearTimeout(this.previousInputTimeouts.shift())
+    }
+
     this[action] = 'input'
     let text = this[findInput].value
     if (text && text !== this[lastText]) {
@@ -395,7 +401,7 @@ function onInput () {
       lockNext.call(this)
       focusInput.call(this, true)
     }
-  }, 50)
+  }, 50))
 }
 
 function onKeydown (e) {
