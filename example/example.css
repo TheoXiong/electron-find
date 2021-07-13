@@ -5,7 +5,7 @@ body{
   box-sizing: border-box;
   overflow: auto;
 }
-section{
+section, footer {
   padding: 10px 20px;
 }
 h3{

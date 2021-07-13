@@ -24,3 +24,11 @@ let findInPage = new FindInPage(remote.getCurrentWebContents(), {
 ipcRenderer.on('on-find', (e, args) => {
   findInPage.openFindWindow()
 })
+
+function onChange () {
+  const titleDom = document.querySelector('#title')
+  titleDom.innerHTML = '标题已被修改'
+  setTimeout(() => {
+    findInPage.update()
+  }, 20)
+}

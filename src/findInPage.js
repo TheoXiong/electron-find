@@ -125,6 +125,11 @@ class FindInPage extends Find{
       .catch(err => { throw err })
     return true
   }
+  update () {
+    if (this[hasOpened] && this.isFinding()) {
+      onForwardClick.call(this)
+    }
+  }
   destroy () {
     this.destroyFind()
     unbindEvents.call(this)

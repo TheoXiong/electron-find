@@ -77,11 +77,11 @@ findInPage.openFindWindow()
 
 # there is a simply demo for reference
 npm install
-npm run e
+npm run dev
 
 # there is another example with webview
 npm install
-npm run e2
+npm run dev:webview
 ```
 ## Shortcut
 | keys   |   function  |
