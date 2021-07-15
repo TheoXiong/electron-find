@@ -229,6 +229,10 @@ function removeElement () {
 function creatEventHandler () {
   this[documentKeydown] = (function (e) {
     if (!this[hasOpened]) return
+
+    var selection = window.getSelection()
+    if(selection.focusNode && selection.focusNode !== this[findBox]) return
+
     onKeydown.call(this, e)
   }).bind(this)
   this[events].push({ ele: document, name: 'keydown', fn: this[documentKeydown] })
@@ -364,7 +368,8 @@ function focusInput (doBlur = false) {
 }
 
 function wrapInput (inputEle, caseEle, timeout = 50) {
-  inputEle.type = 'password'
+  // inputEle.type = 'password'
+  inputEle.style['visibility'] = 'hidden'
   caseEle.style['visibility'] = 'hidden'
 
   setTimeout(() => {
@@ -375,13 +380,20 @@ function wrapInput (inputEle, caseEle, timeout = 50) {
   }, timeout)
 }
 function unwrapInput (inputEle, caseEle) {
-  inputEle.type = 'text'
+  // inputEle.type = 'text'
+  inputEle.style['visibility'] = 'visible'
   caseEle.style['visibility'] = 'visible'
 }
 
 function onInput () {
-  setTimeout(() => {
+  this.previousInputTimeouts = this.previousInputTimeouts || []
+  this.previousInputTimeouts.push(setTimeout(() => {
     if (this[inComposition]) return
+
+    while(this.previousInputTimeouts.length) {
+      clearTimeout(this.previousInputTimeouts.shift())
+    }
+
     this[action] = 'input'
     let text = this[findInput].value
     if (text && text !== this[lastText]) {
@@ -394,15 +406,20 @@ function onInput () {
       lockNext.call(this)
       focusInput.call(this, true)
     }
-  }, 50)
+  }, 50))
 }
 
 function onKeydown (e) {
   if (this[inComposition] || !e) return
+  let text;
   switch (e.code) {
     case 'Enter':
+      text = this[findInput].value
+      if (!text) return
+      e.shiftKey ? findKeep.call(this, false) : findKeep.call(this, true)
+      break
     case 'NumpadEnter':
-      let text = this[findInput].value
+      text = this[findInput].value
       if (!text) return
       e.shiftKey ? findKeep.call(this, false) : findKeep.call(this, true)
       break
