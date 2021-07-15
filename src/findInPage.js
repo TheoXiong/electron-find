@@ -99,6 +99,7 @@ class FindInPage extends Find{
   openFindWindow () {
     if (this[hasOpened]) {
       focusInput.call(this)
+      this[findInput].select()
       return false
     }
     if (!this.initialize()) return false
