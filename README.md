@@ -28,41 +28,54 @@ $   npm install electron-find --save
 ```
 
 ## Usage
-```
-# import module
+
+### import module
+```js
 import { remote, ipcRenderer } from 'electron'
 import { FindInPage } from 'electron-find'
+```
 
-# create instance of FindInPage with default config
+### create instance of FindInPage with default config
+```js
 let findInPage = new FindInPage(remote.getCurrentWebContents())
 findInPage.openFindWindow()
+```
 
-# use preload option, the find interface will be loaded when create instance
+### use preload option, the find interface will be loaded when create instance
+```js
 let findInPage = new FindInPage(remote.getCurrentWebContents(), {
   preload: true
 })
 findInPage.openFindWindow()
+```
 
-# config parentElement of find interface, default is document.body
+### config parentElement of find interface, default is document.body
+```js
 let findInPage = new FindInPage(remote.getCurrentWebContents(), {
   parentElement: document.querySelector('#id')
 })
 findInPage.openFindWindow()
+```
 
-# config duration of find interface moving, default is 300 (ms)
+### config duration of find interface moving, default is 300 (ms)
+```js
 let findInPage = new FindInPage(remote.getCurrentWebContents(), {
   duration: 200
 })
 findInPage.openFindWindow()
+```
 
-# config offset relative to parentElement
+### config offset relative to parentElement
+```js
 let findInPage = new FindInPage(remote.getCurrentWebContents(), {
   offsetTop: 20,
   offsetRight: 30
 })
 findInPage.openFindWindow()
+```
 
-# config UI of find interface 
+### config UI of find interface 
+```js
 let findInPage = new FindInPage(remote.getCurrentWebContents(), {
   boxBgColor: '#333',
   boxShadowColor: '#000',
@@ -74,16 +87,21 @@ let findInPage = new FindInPage(remote.getCurrentWebContents(), {
   caseSelectedColor: '#555'
 })
 findInPage.openFindWindow()
+```
 
-# there is a simply demo for reference
+### there is a simple demo for reference
+```js
 npm install
 npm run dev
+```
 
-# there is another example with webview
+### there is another example with webview
+```js
 npm install
 npm run dev:webview
 ```
-## Shortcut
+
+## Shortcuts
 | keys   |   function  |
 | ------ | ------      | 
 | Enter  | find next   | 
