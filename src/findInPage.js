@@ -218,9 +218,12 @@ function setCloseStyle () {
   this[findClose].appendChild(closeInner2)
 }
 function appendElement () {
-  [this[findInput], this[findMatches], this[findCase], this[findBack], this[findForward], this[findClose]].forEach((item) => { 
-    this[findBox].appendChild(item) 
-  })
+  this[findBox].appendChild(this[findInput])
+  this[findBox].appendChild(this[findMatches])
+  this[findBox].appendChild(this[findCase])
+  this[findBox].appendChild(this[findBack])
+  this[findBox].appendChild(this[findForward])
+  this[findBox].appendChild(this[findClose])
   this.parentElement.appendChild(this[findBox])
 }
 function removeElement () {
