@@ -292,6 +292,8 @@ function creatEventHandler () {
   this[events].push({ ele: this[findBack], name: 'mouseleave', fn: this[backMouseleave] })
 
   this[backClick] = (function () {
+    this[findInput].blur();
+    this[findBack].focus();
     onBackClick.call(this)
   }).bind(this)
   this[events].push({ ele: this[findBack], name: 'click', fn: this[backClick] })
@@ -309,6 +311,8 @@ function creatEventHandler () {
   this[events].push({ ele: this[findForward], name: 'mouseleave', fn: this[forwardMouseleave] })
 
   this[forwardClick] = (function () {
+    this[findInput].blur();
+    this[findForward].focus();
     onForwardClick.call(this)
   }).bind(this)
   this[events].push({ ele: this[findForward], name: 'click', fn: this[forwardClick] })
@@ -404,12 +408,13 @@ function onKeydown (e) {
     case 'NumpadEnter':
       let text = this[findInput].value
       if (!text) return
-      e.shiftKey ? findKeep.call(this, false) : findKeep.call(this, true)
+      // e.shiftKey ? findKeep.call(this, false) : findKeep.call(this, true)
+      e.shiftKey ? this[findForward].click() : this[findBack].click();
       break
     case 'Escape':
       onCloseClick.call(this)
       break
-    default: 
+    default:
       break
   }
 }
@@ -435,13 +440,13 @@ function onCaseClick () {
 
 function onBackClick () {
   this[action] = 'back'
-  wrapInput(this[findInput], this[findCase], 100)
+  wrapInput(this[findInput], this[findCase], 5000)
   this.findNext(false, this[matchCase])
 }
 
 function onForwardClick () {
   this[action] = 'forward'
-  wrapInput(this[findInput], this[findCase], 100)
+  wrapInput(this[findInput], this[findCase], 5000)
   this.findNext(true, this[matchCase])
 }
 
@@ -454,7 +459,8 @@ function onResult () {
     unwrapInput(this[findInput], this[findCase])
     this[findMatches].innerText = `${activeMatch}/${matches}`
     matches > 0 ? unlockNext.call(this) : lockNext.call(this)
-    this[action] === 'input' ? focusInput.call(this) : ''
+    // this[action] === 'input' ? focusInput.call(this) : ''
+    focusInput.call(this);
   })
 }
 
